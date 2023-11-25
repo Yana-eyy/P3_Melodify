@@ -1,7 +1,8 @@
 from tkinter import *
 import pygame
 from tkinter import filedialog
-
+import time
+from mutagen.mp3 import MP3
 
 root = Tk()
 root.title('Melodify')
@@ -13,7 +14,31 @@ root.configure(background="light blue")
 pygame.mixer.init()
 
 
+# grab song length and time info
+def play_time():
+    current_time = pygame.mixer.music.get_pos()/1000
+    # convert it to time format
+    convert_curr_time = time.strftime('%M:%S', time.gmtime(current_time))
+    # get current song
+    current_song = song_box.curselection()
+    song = song_box.get(current_song)
+    song = f'C:/Users/hp/OneDrive/Documents/GitHub/P3_Melodify/Melodify/gui/audio/{song}.mp3'
+    # load song length with mutagen
+    song_mutagen = MP3(song)
+    # get song lenght
+    song_length = song_mutagen.info.length
+    # converts to time format
+    converted_song_length = time.strftime(
+        '%H:%M:%S', time.gmtime(song_length))
+    # output the time to status_bar
+    status_bar.config(text=f'{convert_curr_time}/{converted_song_length} ')
+
+    # updates the time for the music
+    status_bar.after(1000, play_time)
+
 # add song function
+
+
 def add_song():
     # way to browse songs
     song = filedialog.askopenfilename(
@@ -30,17 +55,16 @@ def delete_song():
     pygame.mixer.music.stop()
 
 
-# def deletion_selection():
-    # selected_indices = song_box.curselection()
-    # Delete each selected item in reverse order to avoid index issues
-    # for i in reversed(selected_indices):
-    #    song_box.delete(i)
-    # pygame.mixer.music.stop()
-
-
 def delete_multiple_song():
-    song_box.delete(0, END)
-    pygame.mixer.music.stop()
+    # song_box.delete(0, END)
+    # pygame.mixer.music.stop()
+    selected_songs = song_box.curselection()
+
+    if selected_songs:  # Check if any songs are selected
+        # Delete selected songs in reverse order to avoid index issues
+        for song_index in selected_songs[::-1]:
+            song_box.delete(song_index)
+        pygame.mixer.music.stop()
 
 # multiple songs
 
@@ -52,7 +76,7 @@ def add_multiple_songs():
     # looping and replacing directory
     for song in songs:
         song = song.replace(
-            "C:/Users/hp/OneDrive/Documents/GitHub/P3_Melodify/Melodify/gui/audio", "")
+            "C:/Users/hp/OneDrive/Documents/GitHub/P3_Melodify/Melodify/gui/audio/", "")
         song = song.replace(".mp3", "")
         song_box.insert(END, song)
 
@@ -64,6 +88,8 @@ def play():
     song = f'C:/Users/hp/OneDrive/Documents/GitHub/P3_Melodify/Melodify/gui/audio/{song}.mp3'
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
+    # calls the play_time() to get song lenght
+    play_time()
 
 
 # global thing (can be used in and out of the function stuff)
@@ -129,23 +155,57 @@ def back():
     song_box.selection_set(prev_song, last=None)
 
 
+# Add a global variable to track the repeat state
+global is_repeated
+is_repeated = False
+
 # loop all song
 
 
 def loop():
-    pass
+    global is_repeated
+    if not is_repeated:
+        pygame.mixer.music.set_endevent(pygame.USEREVENT)
+        is_repeated = True
+    else:
+        pygame.mixer.music.set_endevent(0)
+        is_repeated = False
 
 # loop 1 song
 
 
+# Create a variable to store the currently playing song's path
+current_song = None
+
+# Modify the loop function to handle repeating a single song
+
+
 def loop1():
-    pass
+    global current_song
+
+    # Get the currently selected song
+    selected_song = song_box.get(ACTIVE)
+
+    # Check if the selected song is the same as the currently playing song
+    if current_song == selected_song:
+        # If it's the same song, toggle repeat for that song
+        if pygame.mixer.music.get_endevent() == pygame.USEREVENT:
+            pygame.mixer.music.set_endevent(0)
+        else:
+            pygame.mixer.music.set_endevent(pygame.USEREVENT)
+    else:
+        # If it's a new song, load it and start playing with repeat off
+        song_path = f'C:/Users/hp/OneDrive/Documents/GitHub/P3_Melodify/Melodify/gui/audio/{selected_song}.mp3'
+        pygame.mixer.music.load(song_path)
+        pygame.mixer.music.play(loops=0)
+        current_song = selected_song
 
 
 # create playlist box
 song_box = Listbox(root, bg="black", fg="green", width=90,
                    selectbackground="gray", selectforeground="black")
 song_box.pack(pady=20)
+
 
 # define player control buttons images
 back_btn_img = PhotoImage(file='c:Melodify\gui\images\BACK.png')
@@ -200,5 +260,8 @@ delete_song_menu.add_command(
     label="Remove a Song from playlist", command=delete_song)
 delete_song_menu.add_command(
     label="Remove Multiple from playlist", command=delete_multiple_song)
+
+status_bar = Label(root, text='', bd=1, relief=GROOVE, anchor=E)
+status_bar.pack(fill=X, side=BOTTOM, ipady=2)
 
 root.mainloop()
