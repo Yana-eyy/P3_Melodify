@@ -8,7 +8,7 @@ root = Tk()
 root.title('Melodify')
 root.iconbitmap(
     r'C:/Users/hp/OneDrive/Documents/GitHub/P3_Melodify/Melodify/gui/LOGO.ico')
-root.geometry("600x400")
+root.geometry("700x400")
 root.configure(background="light blue")
 # initializing pygame mixer
 pygame.mixer.init()
@@ -201,6 +201,26 @@ def loop1():
         current_song = selected_song
 
 
+def shuffle():
+    import random
+
+    # Get all the songs in the listbox
+    songs = list(song_box.get(0, END))
+
+    # Shuffle the songs randomly
+    random.shuffle(songs)
+
+    # Clear the current listbox
+    song_box.delete(0, END)
+
+    # Insert the shuffled songs into the listbox
+    for song in songs:
+        song_box.insert(END, song)
+
+    # Play the first song in the shuffled playlist
+    play()
+
+
 # create playlist box
 song_box = Listbox(root, bg="black", fg="green", width=90,
                    selectbackground="gray", selectforeground="black")
@@ -215,6 +235,7 @@ pause_btn_img = PhotoImage(file='c:Melodify\gui\images\PAUSE.png')
 loop_btn_img = PhotoImage(file='c:Melodify\gui\images\LOOP.png')
 loop1_btn_img = PhotoImage(
     file='c:Melodify\gui\images\LOOP 1.png')
+shuffle_btn_img = PhotoImage(file='c:Melodify\gui\images\SHUFFLE.png')
 
 # create player control frame
 control_frame = Frame(root, bg="light blue")
@@ -233,14 +254,16 @@ loop_btn = Button(control_frame, image=loop_btn_img,
                   borderwidth=0, command=loop)
 loop1_btn = Button(control_frame, image=loop1_btn_img,
                    borderwidth=0, command=loop1)
+shuffle_btn = Button(control_frame, image=shuffle_btn_img,
+                     borderwidth=0, command=shuffle)
 
-
-back_btn.grid(row=0, column=0, padx=10)
-play_btn.grid(row=0, column=1, padx=10)
-pause_btn.grid(row=0, column=2, padx=10)
-next_btn.grid(row=0, column=3, padx=10)
-loop_btn.grid(row=0, column=4, padx=10)
-loop1_btn.grid(row=0, column=5, padx=10)
+loop_btn.grid(row=0, column=0, padx=10)
+loop1_btn.grid(row=0, column=1, padx=10)
+back_btn.grid(row=0, column=2, padx=10)
+play_btn.grid(row=0, column=3, padx=10)
+pause_btn.grid(row=0, column=4, padx=10)
+next_btn.grid(row=0, column=5, padx=10)
+shuffle_btn.grid(row=0, column=6, padx=10)
 
 # create menu
 melodify_menu = Menu(root)
