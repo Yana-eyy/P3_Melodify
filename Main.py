@@ -12,7 +12,8 @@ root.title('Melodify')
 root.iconbitmap(
     r'C:/Users/hp/OneDrive/Documents/GitHub/P3_Melodify/Melodify/gui/LOGO.ico')
 root.geometry("900x500")
-root.configure(background="#F7987F")
+root.configure(background="#F7987F",)
+root.resizable(False, False)
 # initializing pygame mixer
 pygame.mixer.init()
 
@@ -36,7 +37,7 @@ def play_time():
     song_length = song_mutagen.info.length
     # converts to time format
     converted_song_length = time.strftime(
-        '%H:%M:%S', time.gmtime(song_length))
+        '%M:%S', time.gmtime(song_length))
     # increase current time by 1 sec
     current_time += 1
     if int(melodify_slider.get()) == int(song_length):
@@ -122,8 +123,9 @@ def add_multiple_songs():
         song_box.insert(END, song)
         original_songs.append(song)  # Add song to original_songs list
 
-
 # play selected song
+
+
 def play():
     global stopped
     stopped = False
@@ -158,8 +160,9 @@ def stop():
 global paused
 paused = False
 
-
 # pauses the current music
+
+
 def pause(is_paused):
     global paused
     paused = is_paused
@@ -171,8 +174,6 @@ def pause(is_paused):
         paused = True
 
 
-# Modify the next() and back() functions to use original_songs after shuffling
-# Modify the next() and back() functions to use shuffled song_box
 def next():
     status_bar.config(text='')
     melodify_slider.config(value=0)
@@ -300,8 +301,9 @@ def toggle_loop1():
         loop_status = False
         loop_btn.config(relief="raised")  # Change the button relief style
 
-
 # Modify the shuffle() function to shuffle both song_box and original_songs
+
+
 def shuffle():
     global original_songs, stopped
     stopped = False
@@ -349,6 +351,7 @@ def change_background(color):
     control_frame.configure(background=color)
     back_btn.configure(background=color)
     next_btn.configure(background=color)
+    pause_btn.configure(background=color)
     play_btn.configure(background=color)
     loop1_btn.configure(background=color)
     loop_btn.configure(background=color)
@@ -388,8 +391,8 @@ master_frame = Frame(root, background="#F7987F")
 master_frame.pack(pady=20)
 
 # create playlist box
-song_box = Listbox(master_frame, bg="black", fg="green", width=90,
-                   selectbackground="gray", selectforeground="black")
+song_box = Listbox(master_frame, bg="#FFFAF0", fg="#333333", width=90,
+                   selectbackground="#DEE4E7", selectforeground="#37474F")
 song_box.grid(row=0, column=0)
 
 
@@ -461,13 +464,17 @@ status_bar.pack(fill=X, side=BOTTOM, ipady=2)
 # background menu cascade
 bg_menu = Menu(melodify_menu, tearoff=False)
 melodify_menu.add_cascade(label="Change Background", menu=bg_menu)
+color_options_menu = Menu(bg_menu, tearoff=False)
+bg_menu.add_cascade(label="Color Options", menu=color_options_menu)
 # bg menu options
-bg_menu.add_command(label="Light Blue",
-                    command=lambda: change_background("light blue"))
-bg_menu.add_command(label="Light Gray",
-                    command=lambda: change_background("light gray"))
-bg_menu.add_command(label="Change back to default",
-                    command=lambda: change_background("#F7987F"))
+color_options_menu.add_command(label="Light Blue",
+                               command=lambda: change_background("light blue"))
+color_options_menu.add_command(label="Change back to default",
+                               command=lambda: change_background("#F7987F"))
+color_options_menu.add_command(label="Dark Mode",
+                               command=lambda: change_background("#37474F"))
+color_options_menu.add_command(label="Light Mode",
+                               command=lambda: change_background("#F8F5FA"))
 
 # dark mode and light mode toggle tba
 
@@ -489,16 +496,28 @@ font_menu.add_command(label="Times New Roman",
                       command=lambda: change_font_family("Times"))
 font_menu.add_command(
     label="Helvetica", command=lambda: change_font_family("Helvetica"))
+font_menu.add_command(
+    label="Ariel", command=lambda: change_font_family("Ariel"))
 
+
+# Create a style object
+style = ttk.Style()
+
+# Configure the style for the horizontal slider
+style.configure('Horizontal.TScale', troughcolor='blue', slidercolor='red')
+
+# Configure the style for the vertical slider
+style.configure('Vertical.TScale', troughcolor='green', slidercolor='yellow')
 
 # position slider
 melodify_slider = ttk.Scale(master_frame, from_=0, to=100,
-                            orient=HORIZONTAL, value=0, command=slider, length=360)
+                            orient=HORIZONTAL, value=0, command=slider, length=360, style='Horizontal.TScale')
 melodify_slider.grid(row=2, column=0, pady=10)
+
 
 # volume slider
 volume_slider = ttk.Scale(volume_frame, from_=1, to=0,
-                          orient=VERTICAL, value=1, command=volume, length=125)
+                          orient=VERTICAL, value=1, command=volume, length=125, style='Vertical.TScale')
 volume_slider.pack(pady=10)
 
 # slider label
